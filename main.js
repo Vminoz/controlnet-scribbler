@@ -26,18 +26,19 @@ document.addEventListener('keydown', (e) => {
   }
   switch (e.key) {
     case '+':
-      ctx.lineWidth = Math.min(ctx.lineWidth+1, lineWidthMax)
+      ctx.lineWidth = Math.min(ctx.lineWidth+1, lineWidthMax);
       func.temporaryContent(penSizeIndicator,ctx.lineWidth);
       break;
     case '-':
-      ctx.lineWidth = Math.max(ctx.lineWidth-1, lineWidthMin)
+      ctx.lineWidth = Math.max(ctx.lineWidth-1, lineWidthMin);
       func.temporaryContent(penSizeIndicator,ctx.lineWidth);
       break;
     case 'z':
-      undo() //TODO: Make z undo last stroke.
+      undo(); //TODO: Make z undo last stroke.
       break;
     case 'c':
-      clearCanvas()
+      clearCanvas();
+      strokes = [];
       break;
   }
 });
