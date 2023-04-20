@@ -1,26 +1,41 @@
 <head>
-<title>Canvas Drawing</title>
-<link rel="stylesheet" type="text/css" href="style.css">
+	<title>Canvas Drawing</title>
+	<link rel="stylesheet" type="text/css" href="style.css" />
+	<script src="./func.js"></script>
 </head>
 
 <body>
 <div>
     <canvas id="canvas" width="512" height="512"></canvas>
     <div id="pen-size-indicator"></div>
-    <img src="https://swedfed.se/assets/images/zink-533x380.jpg" alt="Placeholder" class="picture-box">
+    <img
+		id="img-output"
+		src="https://swedfed.se/assets/images/zink-533x380.jpg"
+		alt="Placeholder"
+		class="picture-box">
 </div>
 
 <form id="Inputs">
     <div>
+        <label for="prompt">Prompt:</label>
         <div>
-            <textarea id="prompt" name="prompt" rows="1" placeholder="Enter prompt..">A painting by Monet</textarea>
+            <textarea
+                id="prompt"
+                name="prompt"
+                class="prompt-box"
+                rows="1"
+                placeholder="Enter prompt..">
+                A painting by Monet
+            </textarea>
         </div>
-    </div>
     <!-- TODO: More inputs for SD, e.g. samples + CFG -->
+    </div>
     <div>
-        <button id="update-btn" type="submit">Update Inputs</button>
+        <button  id="update-btn" type="submit">Update Inputs</button>
     </div>
 </form>
+<button id="submit-btn">Send post request</button>
 
 <script type="module" src="main.js"></script>
+
 </body>
