@@ -15,25 +15,30 @@
 		class="picture-box">
 </div>
 
-<form id="Inputs">
+<div>
     <div>
-        <label for="prompt">Prompt:</label>
-        <div>
-            <textarea
-                id="prompt"
-                name="prompt"
-                class="prompt-box"
-                rows="1"
-                placeholder="Enter prompt.."
-            >A painting by Monet</textarea>
-        </div>
-    <!-- TODO: More inputs for SD, e.g. samples + CFG -->
+        <textarea
+            id="prompt"
+            name="prompt"
+            class="prompt-box"
+            rows="1"
+            placeholder="Enter prompt.."
+        >A painting by Monet</textarea>
     </div>
-    <div>
-        <button  id="update-btn" type="submit">Update Inputs</button>
-    </div>
-</form>
-<button id="submit-btn">Send post request</button>
+<!-- TODO: More inputs for SD, e.g. samples + CFG -->
+</div>
+
+<!-- TODO: Toggle Real-time -->
+<button id="submit-btn" class="orange-btn">Send post request</button>
+
+<div>
+    <p>
+    z:undo,
+    c:clear,
+    +/-:adjust brush size
+    </p>
+</div>
+
 
 <script type="module" src="main.js"></script>
 

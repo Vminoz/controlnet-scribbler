@@ -37,7 +37,7 @@ canvas {
   font-weight: bold;
 }
 
-#update-btn {
+.orange-btn {
   padding: 10px 20px;
   background-color: #ff9d00;
   color: black;
@@ -48,13 +48,13 @@ canvas {
   transition: all 0.2s ease-in-out;
 }
 
-#update-btn:hover {
+.orange-btn:hover {
   background-color: #ffca75;
   transform: translateY(-2px);
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-#update-btn:active {
+.orange-btn:active {
   background-color: #ff9d00;
   color: #fff;
   transform: translateY(0px);

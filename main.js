@@ -4,7 +4,7 @@ import * as func from './funcs.js';
 const canvas = document.getElementById('canvas');
 const penSizeIndicator = document.getElementById('pen-size-indicator');
 const promptTextarea = document.getElementById('prompt');
-const submitBtn = document.getElementById('submitBtn');
+const submitBtn = document.getElementById('submit-btn');
 const imgOutput = document.getElementById('img-output');
 
 const lineWidthMin = 1;
@@ -36,7 +36,7 @@ document.addEventListener('keydown', (e) => {
       func.temporaryContent(penSizeIndicator,ctx.lineWidth);
       break;
     case 'z':
-      undo(); //TODO: Make z undo last stroke.
+      undo();
       break;
     case 'c':
       clearCanvas();
@@ -52,8 +52,6 @@ canvas.addEventListener('mousedown', function(e) {
     size: ctx.lineWidth
   };
   strokes.push(stroke);
-  ctx.beginPath();
-  ctx.moveTo(e.offsetX, e.offsetY);
   isDrawing = true;
 });
 
@@ -76,9 +74,13 @@ promptTextarea.addEventListener('input', function () {
 });
 
 function drawPath(e) {
-  let point = { x: e.offsetX, y: e.offsetY };
-  strokes[strokes.length - 1].points.push(point);
-  ctx.lineTo(e.offsetX, e.offsetY);
+	let stroke = strokes[strokes.length - 1];
+	let start = stroke.points[stroke.points.length - 1];
+  let end = { x: e.offsetX, y: e.offsetY };
+  stroke.points.push(end);
+	ctx.beginPath();
+  ctx.moveTo(start.x, start.y);
+  ctx.lineTo(end.x, end.y);
   ctx.stroke();
 }
 
@@ -92,59 +94,36 @@ function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
+function draw(strokes) {
+  strokes.forEach((stroke) => {
+    ctx.lineWidth = stroke.size
+    ctx.beginPath();
+    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+    stroke.points.forEach((point) => {
+      ctx.lineTo(point.x, point.y);
+    });
+    ctx.stroke();
+  });
+}
 
 submitBtn.addEventListener('click', function () {
 	// taking prompt from textarea of id promptbox
-	const promptText = promptTextarea.value;
-	const xhr = new XMLHttpRequest();
 	const url = 'http://localhost:7860/sdapi/v1/txt2img';
-	const data = JSON.stringify({
-		'enable_hr': false,
-		'denoising_strength': 0,
-		'firstphase_width': 0,
-		'firstphase_height': 0,
-		'hr_scale': 2,
-		'hr_upscaler': 'string',
-		'hr_second_pass_steps': 0,
-		'hr_resize_x': 0,
-		'hr_resize_y': 0,
-		'prompt': promptText,
-		'styles': ['string'],
-		'seed': -1,
-		'subseed': -1,
-		'subseed_strength': 0,
-		'seed_resize_from_h': -1,
-		'seed_resize_from_w': -1,
-		'sampler_name': 'Euler',
-		'batch_size': 1,
-		'n_iter': 1,
-		'steps': 5,
-		'cfg_scale': 7,
-		'width': 512,
-		'height': 512,
-		'restore_faces': false,
-		'tiling': false,
-		'do_not_save_samples': false,
-		'do_not_save_grid': false,
-		'negative_prompt': '',
-		'eta': 0,
-		's_churn': 0,
-		's_tmax': 0,
-		's_tmin': 0,
-		's_noise': 1,
-		'override_settings': {},
-		'override_settings_restore_afterwards': true,
-		'script_args': [],
-		'sampler_index': 'Euler',
-		'script_name': '',
-		'send_images': true,
-		'save_images': false,
-		'alwayson_scripts': {},
-	});
+	fetch('payload.json')
+  .then(response => response.json())
+  .then(payload => {
+    payload.prompt = promptTextarea.value;
+    const data = JSON.stringify(payload);
+		console.log(data)
+    SDPost(url, data);
+  })
+  .catch(error => console.error(error));
+});
 
+function SDPost(url, data) {
+	const xhr = new XMLHttpRequest();
 	xhr.open('POST', url, true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
-
 	xhr.onreadystatechange = function () {
 		if (xhr.readyState === 4 && xhr.status === 200) {
 			console.log(xhr.responseText);
@@ -161,16 +140,4 @@ submitBtn.addEventListener('click', function () {
 	};
 
 	xhr.send(data);
-});
-
-function draw(strokes) {
-  strokes.forEach((stroke) => {
-    ctx.lineWidth = stroke.size
-    ctx.beginPath();
-    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-    stroke.points.forEach((point) => {
-      ctx.lineTo(point.x, point.y);
-    });
-    ctx.stroke();
-  });
 }
