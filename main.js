@@ -1,25 +1,23 @@
 import * as func from './funcs.js';
 
-// Get the canvas element
+//Elements
 const canvas = document.getElementById('canvas');
-const penSizeInput = document.getElementById('pen-size');
+const penSizeIndicator = document.getElementById('pen-size-indicator');
 const promptTextarea = document.getElementById('prompt');
 
-// Set up the canvas context
-const ctx = canvas.getContext('2d');
+const lineWidthMin = 1;
+const lineWidthMax = 50;
 
-// Set the initial drawing state
-let isDrawing = false;
-let lastX = 0;
-let lastY = 0;
+// Canvas context
+const ctx = canvas.getContext('2d');
 
 ctx.strokeStyle = 'white';
 ctx.lineCap = 'round';
-ctx.lineWidth = parseInt(penSizeInput.value);
+ctx.lineWidth = 4;
 
-penSizeInput.addEventListener('change', () => {
-  ctx.lineWidth = parseInt(penSizeInput.value);
-});
+// Set the initial drawing state
+let isDrawing = false;
+let strokes = [];
 
 // Event listener for keydown events on the document
 document.addEventListener('keydown', (e) => {
@@ -28,15 +26,18 @@ document.addEventListener('keydown', (e) => {
   }
   switch (e.key) {
     case '+':
-      ctx.lineWidth = func.increment(penSizeInput)
+      ctx.lineWidth = Math.min(ctx.lineWidth+1, lineWidthMax)
+      func.temporaryContent(penSizeIndicator,ctx.lineWidth);
       break;
     case '-':
-      ctx.lineWidth = func.decrement(penSizeInput)
+      ctx.lineWidth = Math.max(ctx.lineWidth-1, lineWidthMin)
+      func.temporaryContent(penSizeIndicator,ctx.lineWidth);
       break;
     case 'z':
-      func.toggleZoom()
+      undo() //TODO: Make z undo last stroke.
       break;
-    default:
+    case 'c':
+      clearCanvas()
       break;
   }
 });
@@ -44,25 +45,26 @@ document.addEventListener('keydown', (e) => {
 
 // Event listener for mouse down
 canvas.addEventListener('mousedown', function(e) {
+  let stroke = {
+    points: [ {x: e.offsetX, y: e.offsetY} ],
+    size: ctx.lineWidth
+  };
+  strokes.push(stroke);
+  ctx.beginPath();
+  ctx.moveTo(e.offsetX, e.offsetY);
   isDrawing = true;
-  lastX = e.offsetX;
-  lastY = e.offsetY;
 });
 
 // Event listener for mouse move
 canvas.addEventListener('mousemove', function(e) {
   if (isDrawing) {
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.stroke();
-    lastX = e.offsetX;
-    lastY = e.offsetY;
+    drawPath(e);
   }
 });
 
 // Event listener for mouse up
-canvas.addEventListener('mouseup', function() {
+canvas.addEventListener('mouseup', function(e) {
+  drawPath(e)
   isDrawing = false;
 });
 
@@ -71,3 +73,31 @@ promptTextarea.addEventListener('input', function() {
   this.style.height = this.scrollHeight + 'px';
 });
 
+function drawPath(e) {
+  let point = { x: e.offsetX, y: e.offsetY };
+  strokes[strokes.length - 1].points.push(point);
+  ctx.lineTo(e.offsetX, e.offsetY);
+  ctx.stroke();
+}
+
+function undo() {
+  strokes.pop();
+  clearCanvas();
+  draw(strokes);
+}
+
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function draw(strokes) {
+  strokes.forEach((stroke) => {
+    ctx.lineWidth = stroke.size
+    ctx.beginPath();
+    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+    stroke.points.forEach((point) => {
+      ctx.lineTo(point.x, point.y);
+    });
+    ctx.stroke();
+  });
+}

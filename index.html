@@ -5,24 +5,20 @@
 
 <body>
 <div>
-    <label for="pen-size">Pen size:</label>
-    <input type="number" id="pen-size" name="pen-size" min="1" max="50" value="4">
-</div>
-
-<div>
     <canvas id="canvas" width="512" height="512"></canvas>
+    <div id="pen-size-indicator"></div>
     <img src="https://swedfed.se/assets/images/zink-533x380.jpg" alt="Placeholder" class="picture-box">
 </div>
 
 <form id="Inputs">
     <div>
-        <label for="prompt">Prompt:</label>
         <div>
-            <textarea id="prompt" name="prompt" class="prompt-box" rows="1" placeholder="Enter prompt..">A painting by Monet</textarea>
+            <textarea id="prompt" name="prompt" rows="1" placeholder="Enter prompt..">A painting by Monet</textarea>
         </div>
     </div>
+    <!-- TODO: More inputs for SD, e.g. samples + CFG -->
     <div>
-        <button type="submit">Update Inputs</button>
+        <button id="update-btn" type="submit">Update Inputs</button>
     </div>
 </form>
 
