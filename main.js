@@ -101,6 +101,7 @@ function draw(strokes) {
     ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
     stroke.points.forEach((point) => {
       ctx.lineTo(point.x, point.y);
+			ctx.moveTo(point.x, point.y);
     });
     ctx.stroke();
   });
