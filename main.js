@@ -1,69 +1,73 @@
-// Get the canvas element
+import * as func from './funcs.js';
+
+//Elements
 const canvas = document.getElementById('canvas');
-const penSizeInput = document.getElementById('pen-size');
+const penSizeIndicator = document.getElementById('pen-size-indicator');
 const promptTextarea = document.getElementById('prompt');
+const submitBtn = document.getElementById('submitBtn');
+const imgOutput = document.getElementById('img-output');
 
-// Set up the canvas context
+const lineWidthMin = 1;
+const lineWidthMax = 50;
+
+// Canvas context
 const ctx = canvas.getContext('2d');
-
-// Set the initial drawing state
-let isDrawing = false;
-let lastX = 0;
-let lastY = 0;
 
 ctx.strokeStyle = 'white';
 ctx.lineCap = 'round';
-ctx.lineWidth = parseInt(penSizeInput.value);
+ctx.lineWidth = 4;
 
-penSizeInput.addEventListener('change', () => {
-	ctx.lineWidth = parseInt(penSizeInput.value);
-});
+// Set the initial drawing state
+let isDrawing = false;
+let strokes = [];
 
 // Event listener for keydown events on the document
 document.addEventListener('keydown', (e) => {
-	if (
-		e.target.tagName === 'INPUT' ||
-		e.target.tagName === 'TEXTAREA'
-	) {
-		return; // Ignore the keydown event
-	}
-	switch (e.key) {
-		case '+':
-			ctx.lineWidth = func.increment(penSizeInput);
-			break;
-		case '-':
-			ctx.lineWidth = func.decrement(penSizeInput);
-			break;
-		case 'z':
-			func.toggleZoom();
-			break;
-		default:
-			break;
-	}
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    return; // Ignore the keydown event
+  }
+  switch (e.key) {
+    case '+':
+      ctx.lineWidth = Math.min(ctx.lineWidth+1, lineWidthMax);
+      func.temporaryContent(penSizeIndicator,ctx.lineWidth);
+      break;
+    case '-':
+      ctx.lineWidth = Math.max(ctx.lineWidth-1, lineWidthMin);
+      func.temporaryContent(penSizeIndicator,ctx.lineWidth);
+      break;
+    case 'z':
+      undo(); //TODO: Make z undo last stroke.
+      break;
+    case 'c':
+      clearCanvas();
+      strokes = [];
+      break;
+  }
 });
 
 // Event listener for mouse down
-canvas.addEventListener('mousedown', function (e) {
-	isDrawing = true;
-	lastX = e.offsetX;
-	lastY = e.offsetY;
+canvas.addEventListener('mousedown', function(e) {
+  let stroke = {
+    points: [ {x: e.offsetX, y: e.offsetY} ],
+    size: ctx.lineWidth
+  };
+  strokes.push(stroke);
+  ctx.beginPath();
+  ctx.moveTo(e.offsetX, e.offsetY);
+  isDrawing = true;
 });
 
 // Event listener for mouse move
-canvas.addEventListener('mousemove', function (e) {
-	if (isDrawing) {
-		ctx.beginPath();
-		ctx.moveTo(lastX, lastY);
-		ctx.lineTo(e.offsetX, e.offsetY);
-		ctx.stroke();
-		lastX = e.offsetX;
-		lastY = e.offsetY;
-	}
+canvas.addEventListener('mousemove', function(e) {
+  if (isDrawing) {
+    drawPath(e);
+  }
 });
 
 // Event listener for mouse up
-canvas.addEventListener('mouseup', function () {
-	isDrawing = false;
+canvas.addEventListener('mouseup', function(e) {
+  drawPath(e)
+  isDrawing = false;
 });
 
 promptTextarea.addEventListener('input', function () {
@@ -71,12 +75,27 @@ promptTextarea.addEventListener('input', function () {
 	this.style.height = this.scrollHeight + 'px';
 });
 
-const submitBtn = document.getElementById('submitBtn');
-const imgOutput = document.getElementById('img-output');
+function drawPath(e) {
+  let point = { x: e.offsetX, y: e.offsetY };
+  strokes[strokes.length - 1].points.push(point);
+  ctx.lineTo(e.offsetX, e.offsetY);
+  ctx.stroke();
+}
+
+function undo() {
+  strokes.pop();
+  clearCanvas();
+  draw(strokes);
+}
+
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
 
 submitBtn.addEventListener('click', function () {
 	// taking prompt from textarea of id promptbox
-	const prompttext = promptTextarea.value;
+	const promptText = promptTextarea.value;
 	const xhr = new XMLHttpRequest();
 	const url = 'http://localhost:7860/sdapi/v1/txt2img';
 	const data = JSON.stringify({
@@ -89,7 +108,7 @@ submitBtn.addEventListener('click', function () {
 		'hr_second_pass_steps': 0,
 		'hr_resize_x': 0,
 		'hr_resize_y': 0,
-		'prompt': prompttext,
+		'prompt': promptText,
 		'styles': ['string'],
 		'seed': -1,
 		'subseed': -1,
@@ -143,3 +162,15 @@ submitBtn.addEventListener('click', function () {
 
 	xhr.send(data);
 });
+
+function draw(strokes) {
+  strokes.forEach((stroke) => {
+    ctx.lineWidth = stroke.size
+    ctx.beginPath();
+    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+    stroke.points.forEach((point) => {
+      ctx.lineTo(point.x, point.y);
+    });
+    ctx.stroke();
+  });
+}
