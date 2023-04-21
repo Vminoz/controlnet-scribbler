@@ -9,19 +9,31 @@ const imgOutput = document.getElementById('img-output');
 
 const lineWidthMin = 1;
 const lineWidthMax = 50;
+const url = 'http://127.0.0.1:7860/controlnet/txt2img';
 
 // Canvas context
 const ctx = canvas.getContext('2d');
-
 ctx.strokeStyle = 'white';
+ctx.fillStyle = 'black';
 ctx.lineCap = 'round';
 ctx.lineWidth = 4;
+clearCanvas()
 
-// Set the initial drawing state
+// Drawing vars
 let isDrawing = false;
 let strokes = [];
 
-// Event listener for keydown events on the document
+canvas.addEventListener('mousedown', startMouse);
+canvas.addEventListener('mousemove', drawMouse);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('touchstart', startTouch);
+canvas.addEventListener('touchmove', drawTouch);
+canvas.addEventListener('touchend', stopDrawing);
+
+submitBtn.addEventListener('click', callSDAPI);
+
+promptTextarea.addEventListener('input', rescalePrompt);
+
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
     return; // Ignore the keydown event
@@ -45,38 +57,36 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Event listener for mouse down
-canvas.addEventListener('mousedown', function(e) {
+function rescalePrompt() {
+  this.style.height = 'auto';
+  this.style.height = this.scrollHeight + 'px';
+}
+
+function startMouse(e) {
+  startDrawing(e.offsetX,e.offsetY)
+}
+function drawMouse(e) {
+  drawPath(e.offsetX,e.offsetY)
+}
+
+
+function startDrawing(x,y) {
   let stroke = {
-    points: [ {x: e.offsetX, y: e.offsetY} ],
+    points: [{ x: x, y: y }],
     size: ctx.lineWidth
   };
   strokes.push(stroke);
   isDrawing = true;
-});
+  drawPath(x,y);
+}
 
-// Event listener for mouse move
-canvas.addEventListener('mousemove', function(e) {
-  if (isDrawing) {
-    drawPath(e);
+function drawPath(x,y) {
+  if (!isDrawing) {
+    return;
   }
-});
-
-// Event listener for mouse up
-canvas.addEventListener('mouseup', function(e) {
-  drawPath(e)
-  isDrawing = false;
-});
-
-promptTextarea.addEventListener('input', function () {
-	this.style.height = 'auto';
-	this.style.height = this.scrollHeight + 'px';
-});
-
-function drawPath(e) {
 	let stroke = strokes[strokes.length - 1];
 	let start = stroke.points[stroke.points.length - 1];
-  let end = { x: e.offsetX, y: e.offsetY };
+  let end = { x: x, y: y };
   stroke.points.push(end);
 	ctx.beginPath();
   ctx.moveTo(start.x, start.y);
@@ -84,17 +94,41 @@ function drawPath(e) {
   ctx.stroke();
 }
 
+function stopDrawing() {
+  isDrawing = false;
+  callSDAPI();
+}
+
+function startTouch(e) {
+  console.log("Touch Start")
+  const {x, y} = touchPos(e)
+  startDrawing(x, y);
+}
+function drawTouch(e) {
+  const {x, y} = touchPos(e)
+  drawPath(x, y)
+}
+
+function touchPos(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const x = touch.clientX - canvas.offsetLeft;
+  const y = touch.clientY - canvas.offsetTop;
+  return {x,y};
+}
+
 function undo() {
   strokes.pop();
   clearCanvas();
-  draw(strokes);
+  redraw(strokes);
 }
 
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function draw(strokes) {
+function redraw(strokes) {
   strokes.forEach((stroke) => {
     ctx.lineWidth = stroke.size
     ctx.beginPath();
@@ -107,36 +141,40 @@ function draw(strokes) {
   });
 }
 
-submitBtn.addEventListener('click', function () {
-	// taking prompt from textarea of id promptbox
-	const url = 'http://localhost:7860/sdapi/v1/txt2img';
-	fetch('payload.json')
-  .then(response => response.json())
-  .then(payload => {
-    payload.prompt = promptTextarea.value;
-    const data = JSON.stringify(payload);
-		console.log(data)
-    SDPost(url, data);
-  })
-  .catch(error => console.error(error));
-});
+function callSDAPI() {
+  fetch('payload.json')
+    .then(response => response.json())
+    .then(payload => {
+      const dataUrl = canvas.toDataURL();
+      const base64Data = dataUrl.replace(/^data:image\/(png|jpeg);base64,/, "");
+      payload.controlnet_units[0].input_image = base64Data;
+
+      payload.prompt = promptTextarea.value;
+
+      const data = JSON.stringify(payload);
+
+      console.log("Sending Scribble")
+      SDPost(url, data);
+    })
+    .catch(error => console.error(error));
+}
 
 function SDPost(url, data) {
 	const xhr = new XMLHttpRequest();
 	xhr.open('POST', url, true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
+
 	xhr.onreadystatechange = function () {
 		if (xhr.readyState === 4 && xhr.status === 200) {
 			console.log(xhr.responseText);
 		}
 	};
+
 	xhr.onload = function () {
 		if (xhr.readyState === 4 && xhr.status === 200) {
-			const jsonResponse = JSON.parse(xhr.responseText);
-			const base64Response = jsonResponse.images;
-			const image = new Image();
-			image.src = 'data:image/jpeg;base64,' + base64Response;
-			imgOutput.src = 'data:image/jpeg;base64,' + base64Response; //document.body.appendChild(image); // display the image in the HTML
+			const base64Response = JSON.parse(xhr.responseText).images[0];
+			console.log(base64Response);
+			imgOutput.src = 'data:image/jpeg;base64,' + base64Response;
 		}
 	};
 
