@@ -8,7 +8,7 @@
 <body>
 <div>
     <canvas id="canvas" width="512" height="512"></canvas>
-    <div id="pen-size-indicator"></div>
+    <div id="pen-size-indicator" class="orange-label"></div>
     <img
 		id="img-output"
         src="/images/placeholder.png"
@@ -31,11 +31,13 @@
 
 <!-- TODO: Toggle Real-time -->
 <button id="submit-btn" class="orange-btn">Submit Scribble</button>
+<div id="queue-indicator" class="orange-label"></div>
 
 <div>
     <p id="help-paragraph">
     z:undo,
     c:clear,
+    e:eraser,
     +/-:adjust brush size
     </p>
 </div>

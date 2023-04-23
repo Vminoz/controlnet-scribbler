@@ -1,10 +1,11 @@
-import * as func from './funcs.js';
+import * as funcs from './funcs.js';
 
 //Elements
 const canvas = document.getElementById('canvas');
 const penSizeIndicator = document.getElementById('pen-size-indicator');
 const promptTextarea = document.getElementById('prompt');
 const submitBtn = document.getElementById('submit-btn');
+const queueIndicator = document.getElementById('queue-indicator');
 const imgOutput = document.getElementById('img-output');
 
 const lineWidthMin = 1;
@@ -22,6 +23,8 @@ clearCanvas()
 // Drawing vars
 let isDrawing = false;
 let strokes = [];
+let queueLen = 0;
+let isErasing = false;
 
 canvas.addEventListener('mousedown', startMouse);
 canvas.addEventListener('mousemove', drawMouse);
@@ -30,7 +33,7 @@ canvas.addEventListener('touchstart', startTouch);
 canvas.addEventListener('touchmove', drawTouch);
 canvas.addEventListener('touchend', stopDrawing);
 
-submitBtn.addEventListener('click', callSDAPI);
+submitBtn.addEventListener('click', sendToSD);
 
 promptTextarea.addEventListener('input', rescalePrompt);
 
@@ -41,18 +44,23 @@ document.addEventListener('keydown', (e) => {
   switch (e.key) {
     case '+':
       ctx.lineWidth = Math.min(ctx.lineWidth+1, lineWidthMax);
-      func.temporaryContent(penSizeIndicator,ctx.lineWidth);
+      funcs.tempTextContent(penSizeIndicator,`${ctx.lineWidth}px`);
       break;
     case '-':
       ctx.lineWidth = Math.max(ctx.lineWidth-1, lineWidthMin);
-      func.temporaryContent(penSizeIndicator,ctx.lineWidth);
+      funcs.tempTextContent(penSizeIndicator,`${ctx.lineWidth}px`);
       break;
     case 'z':
       undo();
       break;
     case 'c':
-      clearCanvas();
-      strokes = [];
+      if (confirm("Your masterpiece will be irreversibly destroyed")) {
+        clearCanvas();
+        strokes = [];
+      }
+      break;
+    case 'e':
+      toggleEraser()
       break;
   }
 });
@@ -73,7 +81,8 @@ function drawMouse(e) {
 function startDrawing(x,y) {
   let stroke = {
     points: [{ x: x, y: y }],
-    size: ctx.lineWidth
+    size: ctx.lineWidth,
+    style: ctx.strokeStyle
   };
   strokes.push(stroke);
   isDrawing = true;
@@ -96,7 +105,7 @@ function drawPath(x,y) {
 
 function stopDrawing() {
   isDrawing = false;
-  callSDAPI();
+  sendToSD();
 }
 
 function startTouch(e) {
@@ -128,9 +137,22 @@ function clearCanvas() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+function toggleEraser() {
+  isErasing = !isErasing;
+  if (isErasing) {
+    ctx.strokeStyle = 'black';
+    funcs.tempTextContent(penSizeIndicator,"Eraser");
+  } else {
+    ctx.strokeStyle = 'white';
+    funcs.tempTextContent(penSizeIndicator,"Pen");
+  }
+  console.log("toggled erasing:", isErasing)
+}
+
 function redraw(strokes) {
   strokes.forEach((stroke) => {
     ctx.lineWidth = stroke.size
+    ctx.strokeStyle = stroke.style
     ctx.beginPath();
     ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
     stroke.points.forEach((point) => {
@@ -141,7 +163,7 @@ function redraw(strokes) {
   });
 }
 
-function callSDAPI() {
+function sendToSD() {
   fetch('payload.json')
     .then(response => response.json())
     .then(payload => {
@@ -153,10 +175,21 @@ function callSDAPI() {
 
       const data = JSON.stringify(payload);
 
-      console.log("Sending Scribble")
+      console.log("Sending Scribble");
+      queueLen += 1;
+      updateQueueIndicator();
+
       SDPost(url, data);
     })
     .catch(error => console.error(error));
+}
+
+function updateQueueIndicator() {
+  if (queueLen > 0) {
+    queueIndicator.textContent = `${queueLen} Pending...`;
+  } else {
+    queueIndicator.textContent = "";
+  }
 }
 
 function SDPost(url, data) {
@@ -164,17 +197,13 @@ function SDPost(url, data) {
 	xhr.open('POST', url, true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
 
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState === 4 && xhr.status === 200) {
-			console.log(xhr.responseText);
-		}
-	};
-
 	xhr.onload = function () {
 		if (xhr.readyState === 4 && xhr.status === 200) {
 			const base64Response = JSON.parse(xhr.responseText).images[0];
 			console.log(base64Response);
 			imgOutput.src = 'data:image/jpeg;base64,' + base64Response;
+      queueLen -= 1;
+      updateQueueIndicator()
 		}
 	};
 

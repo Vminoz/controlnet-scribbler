@@ -6,8 +6,8 @@ export function toggleZoom() {
 
 let fadeTimeoutId;
 
-export function temporaryContent(element, value) {
-  element.textContent = `${value}px`;
+export function tempTextContent(element, value) {
+  element.textContent = value;
   element.style.opacity = 1;
 
   clearTimeout(fadeTimeoutId);

@@ -25,14 +25,21 @@ canvas {
   margin-top: 5px;
 }
 
-#pen-size-indicator {
-  position: absolute;
-  top: 20px;
-  left: 20px;
+.orange-label {
   font-size: 24px;
   color: #ff9d00;
   font-family: monospace;
   font-weight: bold;
+}
+
+#pen-size-indicator {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+
+#queue-indicator {
+  display: inline-block;
 }
 
 .orange-btn {
