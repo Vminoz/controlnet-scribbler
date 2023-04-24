@@ -1,5 +1,12 @@
-canvas {
+#canvas {
   background-color: black;
+}
+
+#preview-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
 }
 
 .picture-box {
@@ -7,6 +14,12 @@ canvas {
   height: 512px;
   display: inline-block;
   vertical-align: top;
+}
+
+#preview-canvas {
+  position:absolute;
+  top:7px;
+  left:7px;
 }
 
 #prompt {

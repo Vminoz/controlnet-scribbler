@@ -16,8 +16,9 @@
         {
           "module": "none",
           "model": "control_scribble-fp16 [c508311e]",
-          "weight": 1.0,
+          "weight": 1,
           "guessmode": "false",
+          "control_mode": "Balanced",
           "input_image": "PLACEHOLDER"
         }
       ]

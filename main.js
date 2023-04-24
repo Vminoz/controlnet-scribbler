@@ -19,6 +19,9 @@ ctx.fillStyle = 'black';
 ctx.lineCap = 'round';
 ctx.lineWidth = 4;
 clearCanvas()
+const previewCanvas = document.getElementById("preview-canvas");
+const previewCtx = previewCanvas.getContext("2d");
+
 
 // Drawing vars
 let isDrawing = false;
@@ -32,6 +35,7 @@ canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('touchstart', startTouch);
 canvas.addEventListener('touchmove', drawTouch);
 canvas.addEventListener('touchend', stopDrawing);
+canvas.addEventListener('wheel', scrollSize);
 
 submitBtn.addEventListener('click', sendToSD);
 
@@ -43,12 +47,10 @@ document.addEventListener('keydown', (e) => {
   }
   switch (e.key) {
     case '+':
-      ctx.lineWidth = Math.min(ctx.lineWidth+1, lineWidthMax);
-      funcs.tempTextContent(penSizeIndicator,`${ctx.lineWidth}px`);
+      stepPenSize(1);
       break;
     case '-':
-      ctx.lineWidth = Math.max(ctx.lineWidth-1, lineWidthMin);
-      funcs.tempTextContent(penSizeIndicator,`${ctx.lineWidth}px`);
+      stepPenSize(-1);
       break;
     case 'z':
       undo();
@@ -65,6 +67,13 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+function stepPenSize(v) {
+  const temp = Math.min(ctx.lineWidth + v, lineWidthMax);
+  ctx.lineWidth = Math.max(temp, lineWidthMin);
+
+  funcs.tempTextContent(penSizeIndicator, `${ctx.lineWidth}px`);
+}
+
 function rescalePrompt() {
   this.style.height = 'auto';
   this.style.height = this.scrollHeight + 'px';
@@ -76,7 +85,6 @@ function startMouse(e) {
 function drawMouse(e) {
   drawPath(e.offsetX,e.offsetY)
 }
-
 
 function startDrawing(x,y) {
   let stroke = {
@@ -91,6 +99,7 @@ function startDrawing(x,y) {
 
 function drawPath(x,y) {
   if (!isDrawing) {
+    previewPen(x,y)
     return;
   }
 	let stroke = strokes[strokes.length - 1];
@@ -117,13 +126,25 @@ function drawTouch(e) {
   const {x, y} = touchPos(e)
   drawPath(x, y)
 }
-
 function touchPos(e) {
   e.preventDefault();
   const touch = e.touches[0];
   const x = touch.clientX - canvas.offsetLeft;
   const y = touch.clientY - canvas.offsetTop;
   return {x,y};
+}
+
+function scrollSize(e) {
+  e.preventDefault();
+  stepPenSize(-e.deltaY/100);
+}
+
+function previewPen(x,y) {
+  previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+  previewCtx.beginPath();
+  previewCtx.arc(x, y, ctx.lineWidth / 2, 0, Math.PI * 2);
+  previewCtx.strokeStyle = ctx.strokeStyle;
+  previewCtx.stroke();
 }
 
 function undo() {
@@ -221,3 +242,4 @@ function SDPost(url, data) {
     console.error(error);
   }
 }
+
