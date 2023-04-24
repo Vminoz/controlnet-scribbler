@@ -1,3 +1,14 @@
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+.RootContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 canvas {
   background-color: black;
 }
@@ -28,7 +39,6 @@ canvas {
 .orange-label {
   font-size: 24px;
   color: #ff9d00;
-  font-family: monospace;
   font-weight: bold;
 }
 
@@ -72,6 +82,90 @@ canvas {
   align-items: center;
 }
 
-#help-paragraph {
+/* #help-paragraph {
   font-family: 'Courier New', Courier, monospace;
+} */
+
+#help-paragraph {
+  font-weight: bold;
+}
+
+.outputContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+.jsonPayloadContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.parameterContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.parameterContainer_input_row {
+  /* display: inline; */
+  margin-top: 10px;
+}
+
+.parameterContainer_input_row > label {
+  width: 200px;
+  display: block;
+}
+
+.parameterContainer {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  background-color: #2D2D2D;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: "IBM Plex Sans";
+  font-weight: 300;
+  font-size: 15px;
+}
+
+.parameterContainer_input_row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+label {
+  font-size: 16px;
+  color: white;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  outline: none;
+}
+
+input:focus {
+  border-color: #66afe9;
+  box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+}
+
+select {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  outline: none;
+}
+
+select:focus {
+  border-color: #66afe9;
+  box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
 }

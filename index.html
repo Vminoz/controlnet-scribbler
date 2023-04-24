@@ -1,50 +1,66 @@
 <head>
-	<title>SD Scribble</title>
-    <link rel="icon" type="image/x-icon " href="/images/favicon.ico"/>
-	<!-- TODO: Favicon animation to show there are pending images, for fun -->
+    <title>SD Scribble</title>
+    <link rel="icon" type="image/x-icon " href="/images/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.1/axios.min.js"></script>
+    <!-- TODO: Favicon animation to show there are pending images, for fun -->
     <link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 
 <body>
-<div>
-    <canvas id="canvas" width="512" height="512"></canvas>
-    <div id="pen-size-indicator" class="orange-label"></div>
-    <img
-		id="img-output"
-        src="/images/placeholder.png"
-		alt="Placeholder"
-		class="picture-box">
-</div>
-
-<div>
-    <div>
-        <textarea
-            id="prompt"
-            name="prompt"
-            class="prompt-box"
-            rows="1"
-            placeholder="Enter prompt.."
-        >A painting by Monet</textarea>
+    <div class="RootContainer">
+        <div class="outputContainer">
+            <div>
+                <canvas id="canvas" width="512" height="512"></canvas>
+                <div id="pen-size-indicator" class="orange-label"></div>
+                <div>
+                    <div>
+                        <div>
+                            <textarea id="prompt" name="prompt" class="prompt-box" rows="1"
+                                placeholder="Enter prompt..">A painting by Monet</textarea>
+                        </div>
+                        <!-- TODO: More inputs for SD, e.g. samples + CFG -->
+                    </div>
+                    <!-- TODO: Toggle Real-time -->
+                    <div class="container">
+                        <button id="submit-btn" class="orange-btn">Submit Scribble</button>
+                        <div id="queue-indicator" class="orange-label"></div>
+                    </div>
+                    <div>
+                        <p id="help-paragraph">
+                            z:undo,
+                            c:clear,
+                            e:eraser,
+                            +/-:adjust brush size
+                        </p>
+                    </div>
+                    <div class="jsonPayloadContainer">
+                        <div class="parameterContainer">
+                            <div class="parameterContainer_input_row">
+                                <label for="weight">weight</label>
+                                <input id="weight" type="number" min="0" max="2" step="0.05" value="1">
+                            </div>
+                            <div class="parameterContainer_input_row">
+                                <label for="modelUsed">Model</label>
+                                <input id="modelUsed" name="modelUsed" type="text" value="control_v11p_sd15_scribble [d4ba51ff]" />
+                            </div>
+                            <div class="parameterContainer_input_row">
+                                <label for="controlmode">Control mode</label>
+                                <select name="controlmode" id="controlmodeinput">
+                                    <option value="balanced" selected>Balanced</option>
+                                    <option value="My prompt is more important">My prompt is more important</option>
+                                    <option value="ControlNet is more important">ControlNet is more important</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <img id="img-output" src="/images/placeholder.png" alt="Placeholder" class="picture-box">
+        </div>
+        <script type="module" src="main.js"></script>
     </div>
-<!-- TODO: More inputs for SD, e.g. samples + CFG -->
-</div>
-
-<!-- TODO: Toggle Real-time -->
-<div class="container">
-    <button id="submit-btn" class="orange-btn">Submit Scribble</button>
-    <div id="queue-indicator" class="orange-label"></div>
-</div>
-
-<div>
-    <p id="help-paragraph">
-    z:undo,
-    c:clear,
-    e:eraser,
-    +/-:adjust brush size
-    </p>
-</div>
-
-
-<script type="module" src="main.js"></script>
 
 </body>

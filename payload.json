@@ -15,10 +15,11 @@
       "args": [
         {
           "module": "none",
-          "model": "control_scribble-fp16 [c508311e]",
+          "model": "control_v11p_sd15_scribble [d4ba51ff]",
           "weight": 1.0,
           "guessmode": "false",
-          "input_image": "PLACEHOLDER"
+          "input_image": "PLACEHOLDER",
+          "control_mode": "Balanced"
         }
       ]
     }
