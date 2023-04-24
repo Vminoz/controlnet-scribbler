@@ -1,21 +1,26 @@
 {
-    "enable_hr": "false",
-    "prompt": "PLACEHOLDER",
-    "styles": ["string"],
-    "seed": 1,
-    "sampler_name": "Euler a",
-    "batch_size": 1,
-    "steps": 15,
-    "cfg_scale": 7,
-    "width": 512,
-    "height": 512,
-    "negative_prompt": "",
-    "controlnet_units": [
+  "enable_hr": "false",
+  "prompt": "PLACEHOLDER",
+  "styles": ["string"],
+  "seed": 1,
+  "sampler_name": "Euler a",
+  "batch_size": 1,
+  "steps": 10,
+  "cfg_scale": 7,
+  "width": 512,
+  "height": 512,
+  "negative_prompt": "",
+  "alwayson_scripts": {
+    "controlnet": {
+      "args": [
         {
-            "weight": 1.0,
-            "module": "none",
-            "model": "control_scribble-fp16 [c508311e]",
-            "guessmode": "false"
+          "module": "none",
+          "model": "control_scribble-fp16 [c508311e]",
+          "weight": 1.0,
+          "guessmode": "false",
+          "input_image": "PLACEHOLDER"
         }
-    ]
+      ]
+    }
+  }
 }

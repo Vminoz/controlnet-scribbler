@@ -10,7 +10,7 @@ const imgOutput = document.getElementById('img-output');
 
 const lineWidthMin = 1;
 const lineWidthMax = 50;
-const url = 'http://127.0.0.1:7860/controlnet/txt2img';
+const url = 'http://127.0.0.1:7860/sdapi/v1/txt2img';
 
 // Canvas context
 const ctx = canvas.getContext('2d');
@@ -169,22 +169,22 @@ function sendToSD() {
     .then(payload => {
       const dataUrl = canvas.toDataURL();
       const base64Data = dataUrl.replace(/^data:image\/(png|jpeg);base64,/, "");
-      payload.controlnet_units[0].input_image = base64Data;
+      console.log(JSON.stringify(payload))
+      payload.alwayson_scripts.controlnet.args[0].input_image = base64Data;
 
       payload.prompt = promptTextarea.value;
 
       const data = JSON.stringify(payload);
 
-      console.log("Sending Scribble");
-      queueLen += 1;
-      updateQueueIndicator();
-
       SDPost(url, data);
     })
-    .catch(error => console.error(error));
+    .catch(error => {
+      console.error(error);
+    });
 }
 
 function updateQueueIndicator() {
+  queueIndicator.style.color = "";
   if (queueLen > 0) {
     queueIndicator.textContent = `${queueLen} Pending...`;
   } else {
@@ -193,19 +193,31 @@ function updateQueueIndicator() {
 }
 
 function SDPost(url, data) {
-	const xhr = new XMLHttpRequest();
-	xhr.open('POST', url, true);
-	xhr.setRequestHeader('Content-Type', 'application/json');
-
-	xhr.onload = function () {
-		if (xhr.readyState === 4 && xhr.status === 200) {
-			const base64Response = JSON.parse(xhr.responseText).images[0];
-			console.log(base64Response);
-			imgOutput.src = 'data:image/jpeg;base64,' + base64Response;
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', url, true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      const base64Response = JSON.parse(xhr.responseText).images[0];
+      console.log(base64Response);
+      imgOutput.src = 'data:image/jpeg;base64,' + base64Response;
       queueLen -= 1;
       updateQueueIndicator()
-		}
-	};
-
-	xhr.send(data);
+    }
+  };
+  xhr.onerror = function () {
+    console.error('An error occurred during the XMLHttpRequest!');
+    queueLen -= 1
+    updateQueueIndicator()
+    queueIndicator.textContent += " Latest failed!";
+    queueIndicator.style.color = "#ff0000";
+  };
+  console.log("Sending Scribble");
+  queueLen += 1;
+  updateQueueIndicator();
+  try {
+    xhr.send(data);
+  } catch (error) {
+    console.error(error);
+  }
 }
