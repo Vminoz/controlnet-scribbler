@@ -167,12 +167,12 @@ function sendToSD() {
   fetch('payload.json')
     .then(response => response.json())
     .then(payload => {
+      payload.prompt = promptTextarea.value;
+      console.log(JSON.stringify(payload))
+
       const dataUrl = canvas.toDataURL();
       const base64Data = dataUrl.replace(/^data:image\/(png|jpeg);base64,/, "");
-      console.log(JSON.stringify(payload))
       payload.alwayson_scripts.controlnet.args[0].input_image = base64Data;
-
-      payload.prompt = promptTextarea.value;
 
       const data = JSON.stringify(payload);
 
