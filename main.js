@@ -222,33 +222,31 @@ function updateQueueIndicator() {
   }
 }
 
-function SDPost(url, data) {
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', url, true);
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.onload = function () {
-    if (xhr.readyState === 4 && xhr.status === 200) {
-      const base64Response = JSON.parse(xhr.responseText).images[0];
+async function SDPost(url, data) {
+  updateQueueIndicator();
+  queueLen += 1;
+  try {
+    console.log("Sending Scribble");
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: data
+    });
+
+    if (response.ok) {
+      const base64Response = (await response.json()).images[0];
       console.log(base64Response);
       imgOutput.src = 'data:image/jpeg;base64,' + base64Response;
       queueLen -= 1;
-      updateQueueIndicator()
+      updateQueueIndicator();
+    } else {
+      throw new Error(`Request failed with status ${response.status}`);
     }
-  };
-  xhr.onerror = function () {
-    console.error('An error occurred during the XMLHttpRequest!');
-    queueLen -= 1
-    updateQueueIndicator()
+  } catch (error) {
+    console.error('An error occurred during the request!', error);
+    queueLen -= 1;
+    updateQueueIndicator();
     queueIndicator.textContent += " Latest failed!";
     queueIndicator.style.color = "#ff0000";
-  };
-  console.log("Sending Scribble");
-  queueLen += 1;
-  updateQueueIndicator();
-  try {
-    xhr.send(data);
-  } catch (error) {
-    console.error(error);
   }
 }
-
