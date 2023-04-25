@@ -6,45 +6,55 @@
 </head>
 
 <body>
+
+<!-- Canvas and output -->
 <div>
-    <canvas id="canvas" width="512" height="512"></canvas>
     <div id="pen-size-indicator" class="orange-label"></div>
-    <canvas id="preview-canvas" width="512" height="512"></canvas>
+    <canvas id="canvas" width="512" height="512"></canvas>
     <img
-		id="img-output"
+        id="img-output"
         src="/images/placeholder.png"
-		alt="Placeholder"
-		class="picture-box">
+        alt="Placeholder"
+        class="picture-box">
 </div>
 
+
+<!-- Prompt -->
 <div>
-    <div>
-        <textarea
-            id="prompt"
-            name="prompt"
-            class="prompt-box"
-            rows="1"
-            placeholder="Enter prompt.."
-        >A painting by Monet</textarea>
-    </div>
-<!-- TODO: More inputs for SD, e.g. samples + CFG -->
+    <textarea
+        id="prompt"
+        name="prompt"
+        class="prompt-box"
+        rows="1"
+        placeholder="Enter prompt.."
+    >A painting by Monet</textarea>
 </div>
 
+<!-- Submit & Pending -->
 <!-- TODO: Toggle Real-time -->
-<div class="container">
+<div class="flex-center">
     <button id="submit-btn" class="orange-btn">Submit Scribble</button>
     <div id="queue-indicator" class="orange-label"></div>
 </div>
 
-<div>
-    <p id="help-paragraph">
-    z:undo,
-    c:clear,
-    e:eraser,
-    +/-:adjust brush size
-    </p>
+<!-- TODO: More inputs for SD, e.g. samples + CFG -->
+<div class="parameter-container">
+    <span>ControlNet</span>
+    <div>
+        <label for="cn-model">Model</label>
+        <input id="cn-model" type="text" value="control_v11p_sd15_scribble [d4ba51ff]" />
+    </div>
+    <div>
+        <label for="weight">Weight</label>
+        <input class="small-num" id="weight" type="number" min="0" max="2" step="0.1" value="1">
+        <label for="control-mode">Priority</label>
+        <select id="control-mode">
+            <option value="balanced" selected>Default</option>
+            <option value="My prompt is more important" >Prompt</option>
+            <option value="ControlNet is more important">Sketch</option>
+        </select>
+    </div>
 </div>
-
 
 <script type="module" src="main.js"></script>
 

@@ -2,13 +2,6 @@
   background-color: black;
 }
 
-#preview-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: -1;
-}
-
 .picture-box {
   width: 512px;
   height: 512px;
@@ -16,10 +9,16 @@
   vertical-align: top;
 }
 
-#preview-canvas {
-  position:absolute;
-  top:7px;
-  left:7px;
+.help-container {
+  display: flex;
+  width: 512px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.help-container * {
+  margin: 0;
+  padding: 0;
 }
 
 #prompt {
@@ -29,7 +28,7 @@
   line-height: 1.5;
   border: none;
   border-radius: 10px;
-  background-color: #2D2D2D;
+  background-color: #222;
   color: azure;
   outline: none;
   resize: none;
@@ -51,11 +50,6 @@
   left: 20px;
 }
 
-#queue-indicator {
-  display: inline-block;
-  margin-left: 10px;
-}
-
 .orange-btn {
   padding: 10px 20px;
   background-color: #ffaa00;
@@ -75,18 +69,19 @@
 
 .orange-btn:active {
   background-color: #ffaa00;
-  color: #fff;
+  color: azure;
   transform: translateY(0px);
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.container {
-  display: flex;
-  align-items: center;
+#queue-indicator {
+  display: inline-block;
+  margin-left: 10px;
 }
 
-#help-paragraph {
-  font-family: 'Courier New', Courier, monospace;
+.flex-center {
+  display: flex;
+  align-items: center;
 }
 
 .cursor {
@@ -94,4 +89,58 @@
   border-radius: 50%;
   background-color: #ffaa00;
   pointer-events: none;
+}
+
+.parameter-container {
+  width: 300px;
+  padding: 10px;
+  background-color: #222;
+  border-radius: 10px;
+  font-weight: 300;
+  font-size: 24px;
+  color:azure;
+  font-family: 'Courier New', Courier, monospace;
+  margin-top: 20px;
+}
+
+
+.parameter-container >* {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.parameter-container *:focus {
+  border-color: #ffbb44;
+  box-shadow: 0 0 8px #ffaa00;
+}
+
+.parameter-container * label {
+  display: block;
+  font-weight: bold;
+  font-size: 16px;
+  color: azure;
+  font-family: monospace
+}
+
+.parameter-container * select,
+.parameter-container * input {
+  padding: 8px;
+  font-size: 14px;
+  border: 2px solid azure;
+  border-radius: 3px;
+  outline: none;
+  margin-bottom: 0;
+
+}
+
+#cn-model {
+  width: 80%;
+  font-size: 13;
+  text-align: center;
+}
+
+.small-num {
+  width: 60px;
 }
