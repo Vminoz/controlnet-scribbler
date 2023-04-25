@@ -14,14 +14,16 @@ const url = 'http://127.0.0.1:7860/sdapi/v1/txt2img';
 
 // Canvas context
 const ctx = canvas.getContext('2d');
+canvas.style.cursor = "none";
 ctx.strokeStyle = 'white';
 ctx.fillStyle = 'black';
 ctx.lineCap = 'round';
 ctx.lineWidth = 4;
 clearCanvas()
-const previewCanvas = document.getElementById("preview-canvas");
-const previewCtx = previewCanvas.getContext("2d");
-
+const penCursor = document.createElement('div');
+penCursor.classList.add('cursor');
+document.body.appendChild(penCursor);
+setCursorSize(ctx.lineWidth)
 
 // Drawing vars
 let isDrawing = false;
@@ -36,6 +38,8 @@ canvas.addEventListener('touchstart', startTouch);
 canvas.addEventListener('touchmove', drawTouch);
 canvas.addEventListener('touchend', stopDrawing);
 canvas.addEventListener('wheel', scrollSize);
+canvas.addEventListener('mouseenter', showPen);
+canvas.addEventListener('mouseleave', hidePen);
 
 submitBtn.addEventListener('click', sendToSD);
 
@@ -70,8 +74,20 @@ document.addEventListener('keydown', (e) => {
 function stepPenSize(v) {
   const temp = Math.min(ctx.lineWidth + v, lineWidthMax);
   ctx.lineWidth = Math.max(temp, lineWidthMin);
+  setCursorSize(ctx.lineWidth);
+  funcs.tempTextContent(penSizeIndicator, `${Math.round(ctx.lineWidth)}px`);
+}
 
-  funcs.tempTextContent(penSizeIndicator, `${ctx.lineWidth}px`);
+function setCursorSize(size) {
+  penCursor.style.width = size + 'px';
+  penCursor.style.height = size + 'px';
+}
+function showPen() {
+  penCursor.style.visibility = "visible";
+}
+function hidePen() {
+  isDrawing = false;
+  penCursor.style.visibility = "hidden";
 }
 
 function rescalePrompt() {
@@ -98,8 +114,9 @@ function startDrawing(x,y) {
 }
 
 function drawPath(x,y) {
+  penCursor.style.left = x + canvas.offsetLeft - ctx.lineWidth / 2 + 'px';
+  penCursor.style.top = y + canvas.offsetTop - ctx.lineWidth / 2 + 'px';
   if (!isDrawing) {
-    previewPen(x,y)
     return;
   }
 	let stroke = strokes[strokes.length - 1];
@@ -137,14 +154,6 @@ function touchPos(e) {
 function scrollSize(e) {
   e.preventDefault();
   stepPenSize(-e.deltaY/100);
-}
-
-function previewPen(x,y) {
-  previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-  previewCtx.beginPath();
-  previewCtx.arc(x, y, ctx.lineWidth / 2, 0, Math.PI * 2);
-  previewCtx.strokeStyle = ctx.strokeStyle;
-  previewCtx.stroke();
 }
 
 function undo() {
