@@ -1,4 +1,5 @@
 import * as funcs from './funcs.js';
+import * as cls from './classes.js';
 
 ///Elements
 const canvas = document.getElementById('canvas');
@@ -7,11 +8,10 @@ const promptTextarea = document.getElementById('prompt');
 const submitBtn = document.getElementById('submit-btn');
 const queueIndicator = document.getElementById('queue-indicator');
 const imgOutput = document.getElementById('img-output');
-const weightInput = document.getElementById("weight");
+const weightInput = new cls.SteppedNumberInput('weight');
+
 
 // SD Constants
-const weightMin = parseFloat(weightInput.min);
-const weightMax = parseFloat(weightInput.max);
 const url = 'http://127.0.0.1:7860/sdapi/v1/txt2img';
 let haveReceived = false;
 
@@ -53,7 +53,6 @@ submitBtn.addEventListener('click', sendToSD);
 
 promptTextarea.addEventListener('input', rescalePrompt);
 
-weightInput.addEventListener("change", limitInputValue);
 
 window.addEventListener('resize', updatePlaceholder);
 
@@ -208,22 +207,10 @@ function redraw(strokes) {
   });
 }
 
+/// Prompt and params
 function rescalePrompt() {
   promptTextarea.style.height = 'auto';
   promptTextarea.style.height = promptTextarea.scrollHeight + 'px';
-}
-
-function limitInputValue(e) {
-  let value = parseFloat(e.target.value);
-  if (isNaN(value) || value < weightMin) {
-    e.target.value = weightMin;
-  } else {
-    e.target.value = Math.min(value, weightMax);
-  }
-}
-
-function getWeight() {
-  return parseFloat(document.getElementById("weight").value)
 }
 function getModel() {
   return document.getElementById("cn-model").value
@@ -232,6 +219,7 @@ function getControlMode() {
   return document.getElementById("control-mode").value
 }
 
+/// SD API
 function sendToSD() {
   fetch('payload.json')
     .then(response => response.json())
@@ -240,7 +228,7 @@ function sendToSD() {
       payload.prompt = promptTextarea.value;
 
       const ControlNetArgs = payload.alwayson_scripts.controlnet.args[0];
-      ControlNetArgs.weight = getWeight()
+      ControlNetArgs.weight = weightInput.getValue()
       ControlNetArgs.model = getModel()
       ControlNetArgs.control_mode = getControlMode()
 

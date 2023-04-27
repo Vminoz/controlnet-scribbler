@@ -3,7 +3,7 @@
   "prompt": "PLACEHOLDER",
   "styles": ["string"],
   "seed": 1,
-  "sampler_name": "Euler a",
+  "sampler_name": "UniPC",
   "batch_size": 1,
   "steps": 10,
   "cfg_scale": 7,
