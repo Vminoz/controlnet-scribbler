@@ -12,8 +12,7 @@
     <canvas id="canvas" width="512" height="512"></canvas>
     <img
         id="img-output"
-        src="/images/placeholder.png"
-        alt="Placeholder"
+        alt="Output Image"
         class="picture-box">
 </div>
 
@@ -26,7 +25,7 @@
         class="prompt-box"
         rows="1"
         placeholder="Enter prompt.."
-    >A painting by Monet</textarea>
+    >Painting by H. R. Giger</textarea>
 </div>
 
 <!-- Submit & Pending -->
@@ -40,14 +39,14 @@
     <span>ControlNet</span>
     <div>
         <label for="cn-model">Model</label>
-        <input id="cn-model" type="text" value="control_v11p_sd15_scribble [d4ba51ff]" />
+        <input id="cn-model" type="text" value="control_scribble-fp16 [c508311e]" />
     </div>
     <div>
         <label for="weight">Weight</label>
         <input class="small-num" id="weight" type="number" min="0" max="2" step="0.1" value="1">
         <label for="control-mode">Priority</label>
         <select id="control-mode">
-            <option value="balanced" selected>Default</option>
+            <option value="Balanced" selected>Default</option>
             <option value="My prompt is more important" >Prompt</option>
             <option value="ControlNet is more important">Sketch</option>
         </select>

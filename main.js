@@ -23,20 +23,23 @@ ctx.fillStyle = 'black';
 ctx.lineCap = 'round';
 ctx.lineWidth = 4;
 clearCanvas()
+updatePlaceholder()
+
+/// Drawing vars
+const lineWidthMin = 1;
+const lineWidthMax = 200;
+let lastMouseX = 0;
+let lastMouseY = 0;
+let isDrawing = false;
+let strokes = [];
+let queueLen = 0;
+let isErasing = false;
 
 /// Pen Cursor
 const penCursor = document.createElement('div');
 penCursor.classList.add('cursor');
 document.body.appendChild(penCursor);
 setPenCursorSize(ctx.lineWidth)
-
-/// Drawing vars
-const lineWidthMin = 1;
-const lineWidthMax = 200;
-let isDrawing = false;
-let strokes = [];
-let queueLen = 0;
-let isErasing = false;
 
 /// Events
 canvas.addEventListener('mousedown', startMouse);
@@ -52,7 +55,6 @@ canvas.addEventListener('mouseleave', hidePen);
 submitBtn.addEventListener('click', sendToSD);
 
 promptTextarea.addEventListener('input', rescalePrompt);
-
 
 window.addEventListener('resize', updatePlaceholder);
 
@@ -106,8 +108,9 @@ function startDrawing(x,y) {
   drawPath(x,y);
 }
 function drawPath(x,y) {
-  penCursor.style.left = x + canvas.offsetLeft - ctx.lineWidth / 2 + 'px';
-  penCursor.style.top = y + canvas.offsetTop - ctx.lineWidth / 2 + 'px';
+  lastMouseX = x;
+  lastMouseY = y;
+  centerPenCursor();
   if (!isDrawing) {
     return;
   }
@@ -123,6 +126,10 @@ function drawPath(x,y) {
 function stopDrawing() {
   isDrawing = false;
   sendToSD();
+}
+function centerPenCursor() {
+  penCursor.style.left = lastMouseX + canvas.offsetLeft - ctx.lineWidth / 2 + 'px';
+  penCursor.style.top = lastMouseY + canvas.offsetTop - ctx.lineWidth / 2 + 'px';
 }
 
 /// Mouse drawing
@@ -155,12 +162,13 @@ function touchPos(e) {
 function stepPenSize(v) {
   const temp = Math.min(ctx.lineWidth + v, lineWidthMax);
   ctx.lineWidth = Math.max(temp, lineWidthMin);
-  setPenCursorSize(ctx.lineWidth);
   funcs.tempTextContent(penSizeIndicator, `${Math.round(ctx.lineWidth)}px`);
+  setPenCursorSize(ctx.lineWidth);
 }
 function setPenCursorSize(size) {
   penCursor.style.width = size + 'px';
   penCursor.style.height = size + 'px';
+  centerPenCursor();
 }
 function scrollSize(e) {
   e.preventDefault();
@@ -177,6 +185,7 @@ function undo() {
   strokes.pop();
   clearCanvas();
   redraw(strokes);
+  setPenCursorSize(ctx.lineWidth);
 }
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);

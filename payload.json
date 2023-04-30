@@ -1,5 +1,5 @@
 {
-  "enable_hr": "false",
+  "enable_hr": false,
   "prompt": "PLACEHOLDER",
   "styles": ["string"],
   "seed": 1,
@@ -15,11 +15,11 @@
       "args": [
         {
           "module": "none",
-          "model": "control_scribble-fp16 [c508311e]",
+          "model": "PLACEHOLDER",
           "weight": 1,
-          "guessmode": "false",
           "control_mode": "Balanced",
-          "input_image": "PLACEHOLDER"
+          "input_image": "PLACEHOLDER",
+          "guess_mode": false
         }
       ]
     }
