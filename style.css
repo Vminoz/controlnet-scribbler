@@ -44,12 +44,6 @@
   font-weight: bold;
 }
 
-#pen-size-indicator {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-}
-
 .orange-btn {
   padding: 10px 20px;
   background-color: #ffaa00;
@@ -82,6 +76,7 @@
 .flex-center {
   display: flex;
   align-items: center;
+
 }
 
 .cursor {
@@ -136,11 +131,45 @@
 }
 
 #cn-model {
-  width: 80%;
+  width: 82%;
   font-size: 13;
   text-align: center;
 }
 
 .small-num {
   width: 60px;
+}
+
+.large-num {
+  width: 85%;
+}
+
+input[type=range] {
+  width: 50%;
+  height: 20px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ddd;
+  border-radius: 10px;
+  outline: none;
+  padding: 0px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 17px;
+  background: black;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#play-pause {
+  font-size: 24px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  padding-right: 10px;
+  width: 40px;
 }

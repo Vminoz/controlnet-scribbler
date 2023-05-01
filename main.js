@@ -1,62 +1,55 @@
-import * as funcs from './funcs.js';
 import * as cls from './classes.js';
 
 ///Elements
-const canvas = document.getElementById('canvas');
-const penSizeIndicator = document.getElementById('pen-size-indicator');
+const imgOutput = document.getElementById('img-output');
+const canvas = new cls.DrawingCanvas('canvas');
+
 const promptTextarea = document.getElementById('prompt');
+const pauseButton = document.getElementById("play-pause");
 const submitBtn = document.getElementById('submit-btn');
 const queueIndicator = document.getElementById('queue-indicator');
-const imgOutput = document.getElementById('img-output');
+
+const seedInput = new cls.SteppedNumberInput('seed');
+const stepsInput = document.getElementById("samples");
+const stepsLabel = document.getElementById("samples-value");
+const cfgInput = document.getElementById("cfg");
+const cfgLabel = document.getElementById("cfg-value");
 const weightInput = new cls.SteppedNumberInput('weight');
+const cnetModelInput = document.getElementById("cn-model");
+const controlModeInput = document.getElementById("control-mode");
 
+stepsLabel.textContent = stepsInput.value;
+stepsInput.oninput = function() {
+  stepsLabel.textContent = this.value;
+}
+cfgLabel.textContent = cfgInput.value;
+cfgInput.oninput = function() {
+  cfgLabel.textContent = this.value;
+}
 
-// SD Constants
+/// SD Vars
 const url = 'http://127.0.0.1:7860/sdapi/v1/txt2img';
 let haveReceived = false;
-
-/// Canvas context
-const ctx = canvas.getContext('2d');
-canvas.style.cursor = "none";
-ctx.strokeStyle = 'white';
-ctx.fillStyle = 'black';
-ctx.lineCap = 'round';
-ctx.lineWidth = 4;
-clearCanvas()
-updatePlaceholder()
-
-/// Drawing vars
-const lineWidthMin = 1;
-const lineWidthMax = 200;
-let lastMouseX = 0;
-let lastMouseY = 0;
-let isDrawing = false;
-let strokes = [];
+let isPaused = false;
 let queueLen = 0;
-let isErasing = false;
-
-/// Pen Cursor
-const penCursor = document.createElement('div');
-penCursor.classList.add('cursor');
-document.body.appendChild(penCursor);
-setPenCursorSize(ctx.lineWidth)
-
-/// Events
-canvas.addEventListener('mousedown', startMouse);
-canvas.addEventListener('mousemove', drawMouse);
-canvas.addEventListener('mouseup', stopDrawing);
-canvas.addEventListener('touchstart', startTouch);
-canvas.addEventListener('touchmove', drawTouch);
-canvas.addEventListener('touchend', stopDrawing);
-canvas.addEventListener('wheel', scrollSize);
-canvas.addEventListener('mouseenter', showPen);
-canvas.addEventListener('mouseleave', hidePen);
+updatePlaceholder();
 
 submitBtn.addEventListener('click', sendToSD);
-
+canvas.canvas.addEventListener('drawstop', sendToSD);
 promptTextarea.addEventListener('input', rescalePrompt);
-
 window.addEventListener('resize', updatePlaceholder);
+
+pauseButton.addEventListener("click", function() {
+  isPaused = !isPaused;
+  if (isPaused) {
+    pauseButton.textContent = "►";
+    canvas.canvas.removeEventListener('drawstop', sendToSD);
+  } else {
+    pauseButton.textContent = "❚❚";
+    canvas.canvas.addEventListener('drawstop', sendToSD);
+    sendToSD();
+  }
+});
 
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
@@ -64,22 +57,22 @@ document.addEventListener('keydown', (e) => {
   }
   switch (e.key) {
     case '+':
-      stepPenSize(1);
+      canvas.stepPenSize(1);
       break;
     case '-':
-      stepPenSize(-1);
+      canvas.stepPenSize(-1);
       break;
     case 'z':
-      undo();
+      canvas.undo();
       break;
     case 'c':
       if (confirm("Your masterpiece will be irreversibly destroyed")) {
-        clearCanvas();
-        strokes = [];
+        canvas.clear();
+        canvas.strokes = [];
       }
       break;
     case 'e':
-      toggleEraser()
+      canvas.toggleEraser()
       break;
   }
 });
@@ -96,136 +89,10 @@ function updatePlaceholder() {
   }
 }
 
-/// Generic drawing
-function startDrawing(x,y) {
-  let stroke = {
-    points: [{ x: x, y: y }],
-    size: ctx.lineWidth,
-    style: ctx.strokeStyle
-  };
-  strokes.push(stroke);
-  isDrawing = true;
-  drawPath(x,y);
-}
-function drawPath(x,y) {
-  lastMouseX = x;
-  lastMouseY = y;
-  centerPenCursor();
-  if (!isDrawing) {
-    return;
-  }
-	let stroke = strokes[strokes.length - 1];
-	let start = stroke.points[stroke.points.length - 1];
-  let end = { x: x, y: y };
-  stroke.points.push(end);
-	ctx.beginPath();
-  ctx.moveTo(start.x, start.y);
-  ctx.lineTo(end.x, end.y);
-  ctx.stroke();
-}
-function stopDrawing() {
-  isDrawing = false;
-  sendToSD();
-}
-function centerPenCursor() {
-  penCursor.style.left = lastMouseX + canvas.offsetLeft - ctx.lineWidth / 2 + 'px';
-  penCursor.style.top = lastMouseY + canvas.offsetTop - ctx.lineWidth / 2 + 'px';
-}
-
-/// Mouse drawing
-function startMouse(e) {
-  startDrawing(e.offsetX,e.offsetY)
-}
-function drawMouse(e) {
-  drawPath(e.offsetX,e.offsetY)
-}
-
-/// Touch support
-function startTouch(e) {
-  console.log("Touch Start")
-  const {x, y} = touchPos(e)
-  startDrawing(x, y);
-}
-function drawTouch(e) {
-  const {x, y} = touchPos(e)
-  drawPath(x, y)
-}
-function touchPos(e) {
-  e.preventDefault();
-  const touch = e.touches[0];
-  const x = touch.clientX - canvas.offsetLeft;
-  const y = touch.clientY - canvas.offsetTop;
-  return {x,y};
-}
-
-/// Drawing controls
-function stepPenSize(v) {
-  const temp = Math.min(ctx.lineWidth + v, lineWidthMax);
-  ctx.lineWidth = Math.max(temp, lineWidthMin);
-  funcs.tempTextContent(penSizeIndicator, `${Math.round(ctx.lineWidth)}px`);
-  setPenCursorSize(ctx.lineWidth);
-}
-function setPenCursorSize(size) {
-  penCursor.style.width = size + 'px';
-  penCursor.style.height = size + 'px';
-  centerPenCursor();
-}
-function scrollSize(e) {
-  e.preventDefault();
-  stepPenSize(-e.deltaY/100);
-}
-function showPen() {
-  penCursor.style.visibility = "visible";
-}
-function hidePen() {
-  isDrawing = false;
-  penCursor.style.visibility = "hidden";
-}
-function undo() {
-  strokes.pop();
-  clearCanvas();
-  redraw(strokes);
-  setPenCursorSize(ctx.lineWidth);
-}
-function clearCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-function toggleEraser() {
-  isErasing = !isErasing;
-  if (isErasing) {
-    ctx.strokeStyle = 'black';
-    funcs.tempTextContent(penSizeIndicator,"Eraser");
-  } else {
-    ctx.strokeStyle = 'white';
-    funcs.tempTextContent(penSizeIndicator,"Pen");
-  }
-  console.log("toggled erasing:", isErasing)
-}
-function redraw(strokes) {
-  strokes.forEach((stroke) => {
-    ctx.lineWidth = stroke.size
-    ctx.strokeStyle = stroke.style
-    ctx.beginPath();
-    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-    stroke.points.forEach((point) => {
-      ctx.lineTo(point.x, point.y);
-			ctx.moveTo(point.x, point.y);
-    });
-    ctx.stroke();
-  });
-}
-
 /// Prompt and params
 function rescalePrompt() {
   promptTextarea.style.height = 'auto';
   promptTextarea.style.height = promptTextarea.scrollHeight + 'px';
-}
-function getModel() {
-  return document.getElementById("cn-model").value
-}
-function getControlMode() {
-  return document.getElementById("control-mode").value
 }
 
 /// SD API
@@ -235,13 +102,16 @@ function sendToSD() {
     .then(payload => {
       console.log("Getting parameters")
       payload.prompt = promptTextarea.value;
+      payload.seed = seedInput.getValue();
+      payload.steps = stepsInput.value;
+      payload.cfg_scale = cfgInput.value;
 
       const ControlNetArgs = payload.alwayson_scripts.controlnet.args[0];
-      ControlNetArgs.weight = weightInput.getValue()
-      ControlNetArgs.model = getModel()
-      ControlNetArgs.control_mode = getControlMode()
+      ControlNetArgs.weight = weightInput.getValue();
+      ControlNetArgs.model = cnetModelInput.value;
+      ControlNetArgs.control_mode = controlModeInput.value;
 
-      console.log(payload)
+      console.log(JSON.stringify(payload));
 
       const dataUrl = canvas.toDataURL();
       const base64Data = dataUrl.replace(/^data:image\/(png|jpeg);base64,/, "");
@@ -268,7 +138,7 @@ async function SDPost(url, data) {
 
     if (response.ok) {
       const base64Response = (await response.json()).images[0];
-      console.log(base64Response);
+      // console.log(base64Response);
       imgOutput.src = 'data:image/jpeg;base64,' + base64Response;
       queueLen -= 1;
       updateQueueIndicator();

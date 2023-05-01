@@ -10,10 +10,12 @@
   "width": 512,
   "height": 512,
   "negative_prompt": "",
+  "save_images": true,
   "alwayson_scripts": {
     "controlnet": {
       "args": [
         {
+          "enabled": true,
           "module": "none",
           "model": "PLACEHOLDER",
           "weight": 1,
