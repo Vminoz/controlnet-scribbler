@@ -1,5 +1,3 @@
-More inputs for SD: samples, CFG, Seed!!
 Favicon animation to show there are pending images, for fun
-Toggle "Real-time"
 Image history buffer, ~10 images kept in memory to cycle through with arrow keys
 See if we can make a list of available models
