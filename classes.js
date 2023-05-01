@@ -164,8 +164,8 @@ export class DrawingCanvas {
   touchPos(e) {
     e.preventDefault();
     const touch = e.touches[0];
-    const x = touch.clientX - this.canvas.offsetLeft;
-    const y = touch.clientY - this.canvas.offsetTop;
+    const x = touch.pageX - this.canvas.offsetLeft;
+    const y = touch.pageY - this.canvas.offsetTop;
     return [x,y];
   }
 
