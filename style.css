@@ -76,7 +76,11 @@
 .flex-center {
   display: flex;
   align-items: center;
+}
 
+.inline-blocks >* {
+  display: inline-block;
+  vertical-align: top;
 }
 
 .cursor {
@@ -99,7 +103,7 @@
 }
 
 
-.parameter-container >* {
+.parameter-container > * {
   display: flex;
   justify-content: space-between;
   align-items: center;

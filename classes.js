@@ -199,6 +199,7 @@ export class DrawingCanvas {
     this.redraw();
     this.updatePenCursorSize(this.ctx.lineWidth);
     this.setErasingState(this.ctx.strokeStyle == '#000000');
+    this.infoShow("Undo")
   }
   clear() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -207,7 +208,8 @@ export class DrawingCanvas {
   toggleEraser() {
     this.isErasing = !this.isErasing;
     this.setErasingState(this.isErasing);
-    console.log("toggled erasing:", this.isErasing)
+    console.log("toggled erasing:", this.isErasing);
+    this.infoShow(this.isErasing ? "Eraser" : "Pen");
   }
   setErasingState(erasing) {
     if (erasing) {
@@ -215,13 +217,11 @@ export class DrawingCanvas {
       this.ctx.strokeStyle = 'black';
       this.penCursor.style.backgroundColor = 'red';
       this.info.style.color = 'red';
-      this.infoShow("Eraser");
     } else {
       this.isErasing = false;
       this.ctx.strokeStyle = 'white';
       this.penCursor.style.backgroundColor = '';
       this.info.style.color = '';
-      this.infoShow("Pen");
     }
   }
   redraw() {
