@@ -207,29 +207,60 @@ function updateQueueIndicator() {
   }
 }
 
-async function SDPost(url, data) {
-  updateQueueIndicator();
-  queueLen += 1;
-  try {
-    console.log("Sending Scribble");
-    const response = await axios.post(url, data, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (response.status === 200) {
-      const base64Response = response.data.images[0];
+function SDPost(url, data) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', url, true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      const base64Response = JSON.parse(xhr.responseText).images[0];
       console.log(base64Response);
       imgOutput.src = 'data:image/jpeg;base64,' + base64Response;
       queueLen -= 1;
-      updateQueueIndicator();
+      updateQueueIndicator()
     }
-  } catch (error) {
-    console.error('An error occurred during the request!', error);
-    queueLen -= 1;
-    updateQueueIndicator();
+  };
+  xhr.onerror = function () {
+    console.error('An error occurred during the XMLHttpRequest!');
+    queueLen -= 1
+    updateQueueIndicator()
     queueIndicator.textContent += " Latest failed!";
     queueIndicator.style.color = "#ff0000";
+  };
+  console.log("Sending Scribble");
+  queueLen += 1;
+  updateQueueIndicator();
+  try {
+    xhr.send(data);
+  } catch (error) {
+    console.error(error);
   }
 }
+
+
+// async function SDPost(url, data) {
+//   updateQueueIndicator();
+//   queueLen += 1;
+//   try {
+//     console.log("Sending Scribble");
+//     const response = await axios.post(url, data, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     });
+
+//     if (response.status === 200) {
+//       const base64Response = response.data.images[0];
+//       console.log(base64Response);
+//       imgOutput.src = 'data:image/jpeg;base64,' + base64Response;
+//       queueLen -= 1;
+//       updateQueueIndicator();
+//     }
+//   } catch (error) {
+//     console.error('An error occurred during the request!', error);
+//     queueLen -= 1;
+//     updateQueueIndicator();
+//     queueIndicator.textContent += " Latest failed!";
+//     queueIndicator.style.color = "#ff0000";
+//   }
+// }
