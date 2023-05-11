@@ -17,10 +17,10 @@ In the meantime, please see the links under **_Resources_**, or follow these inf
 
 ### Rough guide
 1. Install and run [vladmandic/automatic](https://github.com/vladmandic/automatic) (recommended because it's relatively smooth to set up, having some extensions incl. ControlNet out of the box). Alternatively, install [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) and [Mikubill/sd-webui-controlnet](https://github.com/Mikubill/sd-webui-controlnet).
-2. Test ControlNet in the installed webui. If this is working properly you can close it and continue with the next step. Otherwise review step 1.
+2. Test ControlNet in the installed webui, make note of the name of the "_scribble_" model you have, (e.g. `control_scribble-fp16 [c508311e]`). If this is working properly, you can close it and continue with the next step. Otherwise review step 1.
 3. Restart webui.bat or equivalent with command line args to enable api and allow a CORS origin for the front-end, e.g. `--cors-allow-origins=127.0.0.1:3000`. If using [vladmandic/automatic](https://github.com/vladmandic/automatic), api is enabled by default and the argument for CORS origins is `--cors-origins`, or run `webui.bat --help` and check.
 4. Host **index.html** with the allowed ip, e.g. run `python3 -m http.server 3000` in the directory of this repo.
-5. Open http://127.0.0.1:3000 with your browser.
+5. Open http://127.0.0.1:3000 with your browser and make sure the correct model is supplied (edit the default in **index.html** to avoid repeating this), if the model is not found, your scribble will be silently ignored.
 
 ## Resources
 - https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API
