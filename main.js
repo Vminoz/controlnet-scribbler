@@ -39,6 +39,7 @@ canvas.canvas.addEventListener('drawstop', sendToSD);
 promptTextarea.addEventListener('input', rescalePrompt);
 window.addEventListener('resize', updatePlaceholder);
 
+pauseButton.textContent = "❚❚"
 pauseButton.addEventListener("click", function() {
   isPaused = !isPaused;
   if (isPaused) {

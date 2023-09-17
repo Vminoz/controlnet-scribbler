@@ -49,7 +49,7 @@ export class DrawingCanvas {
 
     this.strokes = [];
     this.lineWidthMin = 1;
-    this.lineWidthMax = 200;
+    this.lineWidthMax = 1000;
     this.lastMouseX = 0;
     this.lastMouseY = 0;
     this.isDrawing = false;
@@ -184,7 +184,7 @@ export class DrawingCanvas {
   }
   scrollSize(e) {
     e.preventDefault();
-    this.stepPenSize(-e.deltaY/100);
+    this.stepPenSize(-e.deltaY/10);
   }
   showPen() {
     this.penCursor.style.visibility = "visible";
